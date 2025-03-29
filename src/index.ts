@@ -51,12 +51,18 @@ export class ChatCompletions implements INodeType {
       const apiKey = this.getNodeParameter('apiKey', i) as string;
 
       try {
-        // Chamada para a API usando axios
+        // Chamada para a API usando axios com o formato correto para ChatGPT
         const response = await axios.post(
           'https://api.openai.com/v1/chat/completions',
           {
-            prompt, // ou outro formato exigido pela API
-            // inclua outros parâmetros exigidos pela API
+            model: 'gpt-3.5-turbo',
+            messages: [
+              {
+                role: 'user',
+                content: prompt
+              }
+            ],
+            max_tokens: 500
           },
           {
             headers: {
