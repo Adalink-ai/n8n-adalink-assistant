@@ -1,5 +1,5 @@
 /**
- * Test function for the ChatCompletions node
+ * Test function for the Adalink Assistant node
  */
 declare function testChatCompletionsNode(): Promise<void>;
 export { testChatCompletionsNode };

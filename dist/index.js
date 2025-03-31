@@ -8,34 +8,68 @@ const axios_1 = __importDefault(require("axios"));
 class ChatCompletions {
     constructor() {
         this.description = {
-            displayName: 'Chat Completions',
-            name: 'chatCompletions',
+            displayName: 'Adalink Assistant',
+            name: 'adalinkAssistant',
             group: ['transform'],
             version: 1,
-            description: 'Interage com uma API de chat completions',
+            description: 'Envia mensagens para um assistente na plataforma Adalink',
             defaults: {
-                name: 'Chat Completions',
+                name: 'Adalink Assistant',
             },
             inputs: [{ type: "main" /* NodeConnectionType.Main */ }],
             outputs: [{ type: "main" /* NodeConnectionType.Main */ }],
             properties: [
                 {
-                    displayName: 'Prompt',
-                    name: 'prompt',
+                    displayName: 'Mensagem',
+                    name: 'message',
                     type: 'string',
                     default: '',
-                    placeholder: 'Digite seu prompt aqui...',
-                    description: 'O prompt que será enviado para a API.',
+                    placeholder: 'Digite sua mensagem aqui...',
+                    description: 'Mensagem que será enviada para o assistente Adalink.',
+                    required: true,
                 },
                 {
-                    displayName: 'API Key',
-                    name: 'apiKey',
+                    displayName: 'Token Adalink',
+                    name: 'adaToken',
                     type: 'string',
                     default: '',
-                    placeholder: 'Sua chave de API',
-                    description: 'Chave de autenticação para acessar a API.',
+                    placeholder: 'ada-XXXXX...',
+                    description: 'Token de autenticação para acessar a API da Adalink.',
+                    required: true,
                 },
-                // Adicione outros parâmetros conforme necessário
+                {
+                    displayName: 'ID do Assistente',
+                    name: 'assistantId',
+                    type: 'string',
+                    default: 'cm8itx12f01d9f9pii9qt781t',
+                    description: 'ID do assistente na plataforma Adalink.',
+                    required: true,
+                },
+                {
+                    displayName: 'ID da Conversa',
+                    name: 'chatId',
+                    type: 'string',
+                    default: '',
+                    description: 'ID da conversa/thread para continuar uma conversa existente.',
+                    required: true,
+                },
+                {
+                    displayName: 'Papel da Mensagem',
+                    name: 'messageRole',
+                    type: 'options',
+                    options: [
+                        {
+                            name: 'Usuário',
+                            value: 'user',
+                        },
+                        {
+                            name: 'Sistema',
+                            value: 'system',
+                        },
+                    ],
+                    default: 'user',
+                    description: 'Papel da mensagem a ser enviada.',
+                },
             ],
         };
     }
@@ -45,23 +79,25 @@ class ChatCompletions {
         // Itera sobre os itens de entrada (caso haja múltiplos)
         for (let i = 0; i < items.length; i++) {
             // Obtém os parâmetros do node
-            const prompt = this.getNodeParameter('prompt', i);
-            const apiKey = this.getNodeParameter('apiKey', i);
+            const message = this.getNodeParameter('message', i);
+            const adaToken = this.getNodeParameter('adaToken', i);
+            const assistantId = this.getNodeParameter('assistantId', i);
+            const chatId = this.getNodeParameter('chatId', i);
+            const messageRole = this.getNodeParameter('messageRole', i);
             try {
-                // Chamada para a API usando axios com o formato correto para ChatGPT
-                const response = await axios_1.default.post('https://api.openai.com/v1/chat/completions', {
-                    model: 'gpt-3.5-turbo',
-                    messages: [
-                        {
-                            role: 'user',
-                            content: prompt
-                        }
-                    ],
-                    max_tokens: 500
+                // Chamada para a API Adalink
+                const response = await axios_1.default.post('https://api.adalink.ai/api/v1/chat', {
+                    assistantId,
+                    message: {
+                        role: messageRole,
+                        content: message
+                    },
+                    chatId
                 }, {
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`,
+                        'accept': 'application/json',
+                        'x-ada-token': adaToken,
                     },
                 });
                 // Armazena a resposta para este item
@@ -70,10 +106,10 @@ class ChatCompletions {
             catch (error) {
                 // Tratamento de erros com typing correto
                 if (error instanceof Error) {
-                    throw new Error(`Erro ao chamar a API: ${error.message}`);
+                    throw new Error(`Erro ao chamar a API Adalink: ${error.message}`);
                 }
                 else {
-                    throw new Error(`Erro ao chamar a API: ${String(error)}`);
+                    throw new Error(`Erro ao chamar a API Adalink: ${String(error)}`);
                 }
             }
         }
