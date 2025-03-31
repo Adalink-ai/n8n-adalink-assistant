@@ -27,10 +27,7 @@ class MockExecuteFunctions implements Partial<IExecuteFunctions> {
   }
 
   getNodeParameter(parameterName: string, itemIndex: number): any {
-    if (this.parameters[parameterName] && this.parameters[parameterName][itemIndex] !== undefined) {
-      return this.parameters[parameterName][itemIndex];
-    }
-    throw new Error(`Parameter "${parameterName}" for item index ${itemIndex} not found!`);
+    return this.parameters[parameterName]?.[itemIndex];
   }
 
   getInputData(): INodeExecutionData[] {
@@ -43,32 +40,41 @@ class MockExecuteFunctions implements Partial<IExecuteFunctions> {
 }
 
 /**
- * Test function for the ChatCompletions node
+ * Test function for the Adalink Assistant node
  */
 async function testChatCompletionsNode(): Promise<void> {
   try {
-    console.log('Testing ChatCompletions node...');
+    console.log('Testing Adalink Assistant node...');
     
     // Create instance of the node
     const node = new ChatCompletions();
     console.log('Node type:', node.description.name);
     
-    // Create test parameters - replace with your actual API key
-    const apiKey = process.env.OPENAI_API_KEY || 'YOUR_API_KEY_HERE';
-    const testPrompt = 'Explain the concept of TypeScript in one paragraph.';
+    // Create test parameters
+    const adaToken = process.env.ADA_TOKEN || 'ada-BV81L8T87jWvKEyMVQylX2vRVJyz18vdI9Hxx6tmt0krwHGi0Lt2h0BX2yaW';
+    const testMessage = 'Explique o conceito de TypeScript em um parágrafo.';
+    const assistantId = process.env.ASSISTANT_ID || 'cm8itx12f01d9f9pii9qt781t';
+    const chatId = process.env.CHAT_ID || 'test-chat-id-123';
+    const messageRole = 'user';
     
     // Create mock execute functions
     const mockExecuteFunctions = new MockExecuteFunctions(
       {
-        prompt: testPrompt,
-        apiKey: apiKey
+        message: testMessage,
+        adaToken: adaToken,
+        assistantId: assistantId,
+        chatId: chatId,
+        messageRole: messageRole
       },
       [{ json: { example: 'data' } } as INodeExecutionData]
     );
     
     console.log('Executing node with parameters:');
-    console.log('- Prompt:', testPrompt);
-    console.log('- API Key:', apiKey.substring(0, 3) + '...' + apiKey.substring(apiKey.length - 3));
+    console.log('- Message:', testMessage);
+    console.log('- Ada Token:', adaToken.substring(0, 7) + '...' + adaToken.substring(adaToken.length - 7));
+    console.log('- Assistant ID:', assistantId);
+    console.log('- Chat ID:', chatId);
+    console.log('- Message Role:', messageRole);
     
     // Cast the mock to the expected type and execute
     // Note: this is not a perfect mock but sufficient for basic testing
@@ -89,14 +95,14 @@ async function testChatCompletionsNode(): Promise<void> {
 
 // Run the test if executed directly
 if (require.main === module) {
-  if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'YOUR_API_KEY_HERE') {
+  if (process.env.ADA_TOKEN) {
     console.log('Running node test...');
     testChatCompletionsNode()
       .then(() => console.log('Test execution finished'))
       .catch(error => console.error('Unhandled error during test:', error));
   } else {
-    console.log('Please set your OPENAI_API_KEY environment variable to run this test');
-    console.log('For example: OPENAI_API_KEY=your_key_here ts-node src/test.ts');
+    console.log('Please set your ADA_TOKEN environment variable to run this test');
+    console.log('For example: ADA_TOKEN=ada-xxx... ts-node src/test.ts');
   }
 }
 

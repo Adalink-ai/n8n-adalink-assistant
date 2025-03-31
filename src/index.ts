@@ -9,34 +9,68 @@ import axios from 'axios';
 
 export class ChatCompletions implements INodeType {
   description: INodeTypeDescription = {
-    displayName: 'Chat Completions',
-    name: 'chatCompletions',
+    displayName: 'Adalink Assistant',
+    name: 'adalinkAssistant',
     group: ['transform'],
     version: 1,
-    description: 'Interage com uma API de chat completions',
+    description: 'Envia mensagens para um assistente na plataforma Adalink',
     defaults: {
-      name: 'Chat Completions',
+      name: 'Adalink Assistant',
     },
     inputs: [{ type: NodeConnectionType.Main }],
     outputs: [{ type: NodeConnectionType.Main }],
     properties: [
       {
-        displayName: 'Prompt',
-        name: 'prompt',
+        displayName: 'Mensagem',
+        name: 'message',
         type: 'string',
         default: '',
-        placeholder: 'Digite seu prompt aqui...',
-        description: 'O prompt que será enviado para a API.',
+        placeholder: 'Digite sua mensagem aqui...',
+        description: 'Mensagem que será enviada para o assistente Adalink.',
+        required: true,
       },
       {
-        displayName: 'API Key',
-        name: 'apiKey',
+        displayName: 'Token Adalink',
+        name: 'adaToken',
         type: 'string',
         default: '',
-        placeholder: 'Sua chave de API',
-        description: 'Chave de autenticação para acessar a API.',
+        placeholder: 'ada-XXXXX...',
+        description: 'Token de autenticação para acessar a API da Adalink.',
+        required: true,
       },
-      // Adicione outros parâmetros conforme necessário
+      {
+        displayName: 'ID do Assistente',
+        name: 'assistantId',
+        type: 'string',
+        default: 'cm8itx12f01d9f9pii9qt781t',
+        description: 'ID do assistente na plataforma Adalink.',
+        required: true,
+      },
+      {
+        displayName: 'ID da Conversa',
+        name: 'chatId',
+        type: 'string',
+        default: '',
+        description: 'ID da conversa/thread para continuar uma conversa existente.',
+        required: true,
+      },
+      {
+        displayName: 'Papel da Mensagem',
+        name: 'messageRole',
+        type: 'options',
+        options: [
+          {
+            name: 'Usuário',
+            value: 'user',
+          },
+          {
+            name: 'Sistema',
+            value: 'system',
+          },
+        ],
+        default: 'user',
+        description: 'Papel da mensagem a ser enviada.',
+      },
     ],
   };
 
@@ -47,27 +81,29 @@ export class ChatCompletions implements INodeType {
     // Itera sobre os itens de entrada (caso haja múltiplos)
     for (let i = 0; i < items.length; i++) {
       // Obtém os parâmetros do node
-      const prompt = this.getNodeParameter('prompt', i) as string;
-      const apiKey = this.getNodeParameter('apiKey', i) as string;
+      const message = this.getNodeParameter('message', i) as string;
+      const adaToken = this.getNodeParameter('adaToken', i) as string;
+      const assistantId = this.getNodeParameter('assistantId', i) as string;
+      const chatId = this.getNodeParameter('chatId', i) as string;
+      const messageRole = this.getNodeParameter('messageRole', i) as string;
 
       try {
-        // Chamada para a API usando axios com o formato correto para ChatGPT
+        // Chamada para a API Adalink
         const response = await axios.post(
-          'https://api.openai.com/v1/chat/completions',
+          'https://api.adalink.ai/api/v1/chat',
           {
-            model: 'gpt-3.5-turbo',
-            messages: [
-              {
-                role: 'user',
-                content: prompt
-              }
-            ],
-            max_tokens: 500
+            assistantId,
+            message: {
+              role: messageRole,
+              content: message
+            },
+            chatId
           },
           {
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${apiKey}`,
+              'accept': 'application/json',
+              'x-ada-token': adaToken,
             },
           }
         );
@@ -77,9 +113,9 @@ export class ChatCompletions implements INodeType {
       } catch (error: unknown) {
         // Tratamento de erros com typing correto
         if (error instanceof Error) {
-          throw new Error(`Erro ao chamar a API: ${error.message}`);
+          throw new Error(`Erro ao chamar a API Adalink: ${error.message}`);
         } else {
-          throw new Error(`Erro ao chamar a API: ${String(error)}`);
+          throw new Error(`Erro ao chamar a API Adalink: ${String(error)}`);
         }
       }
     }
