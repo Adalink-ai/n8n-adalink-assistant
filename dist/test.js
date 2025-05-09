@@ -43,9 +43,9 @@ async function testChatCompletionsNode() {
         const node = new index_1.ChatCompletions();
         console.log('Node type:', node.description.name);
         // Create test parameters
-        const adaToken = process.env.ADA_TOKEN || 'ada-BV81L8T87jWvKEyMVQylX2vRVJyz18vdI9Hxx6tmt0krwHGi0Lt2h0BX2yaW';
+        const adaToken = process.env.ADA_TOKEN || 'ada-0x';
         const testMessage = 'Explique o conceito de TypeScript em um parágrafo.';
-        const assistantId = process.env.ASSISTANT_ID || 'cm8itx12f01d9f9pii9qt781t';
+        const assistantId = process.env.ASSISTANT_ID || 'cm';
         const chatId = process.env.CHAT_ID || 'test-chat-id-123';
         const messageRole = 'user';
         // Create mock execute functions

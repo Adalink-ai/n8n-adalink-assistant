@@ -1,6 +1,6 @@
 {
-  "name": "n8n-adalink-assistant",
-  "version": "1.0.3",
+  "name": "n8n-nodes-adalink-assistant",
+  "version": "1.0.4",
   "description": "Custom n8n node for Adalink Assistant integration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
